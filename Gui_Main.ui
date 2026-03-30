@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>920</width>
+    <height>756</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>10</y>
+      <width>681</width>
+      <height>651</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="pushButton_search">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>20</y>
+       <width>51</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Search</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_searcBar">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>301</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QListWidget" name="listWidget_titles">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>256</width>
+       <height>561</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_title">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>80</y>
+       <width>341</width>
+       <height>51</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_episodes">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>140</y>
+       <width>341</width>
+       <height>51</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_status">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>200</y>
+       <width>341</width>
+       <height>51</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_aired">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>260</y>
+       <width>341</width>
+       <height>51</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_duration">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>320</y>
+       <width>341</width>
+       <height>51</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_synopsis">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>390</y>
+       <width>351</width>
+       <height>241</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="frame_2">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>10</y>
+      <width>211</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="pushButton_exit">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>170</y>
+       <width>161</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Exit</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_removeList">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>120</y>
+       <width>161</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Remove List</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_createnewlist">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>161</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Create New List</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_NewList">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>70</y>
+       <width>161</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="frame_3">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>260</y>
+      <width>211</width>
+      <height>401</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QListWidget" name="listWidget_files">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>11</y>
+       <width>191</width>
+       <height>381</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>920</width>
+     <height>33</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
