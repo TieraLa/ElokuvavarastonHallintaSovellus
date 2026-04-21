@@ -31,12 +31,23 @@ def fetch_anime_data(animetitle, parent=None):
     selected = results[items.index(choice)]
 
    
-    keys_to_copy = ["title", "episodes", "status", "aired", "duration", "synopsis"]
-    anime_dict = {}
-    for key in keys_to_copy:
-        if key == "aired":
-            anime_dict[key] = selected[key]["string"] if selected.get(key) else ""
-        else:
-            anime_dict[key] = selected.get(key, "")
+    aired = selected.get("aired", {})
+    from_date = aired.get("from", "")[:10]
+    to_date = aired.get("to")
+
+    if to_date:
+        to_date = to_date[:10]
+    else:
+        to_date = "Ongoing"
+
+    anime_dict = {
+        "title": selected.get("title", ""),
+        "type": selected.get("type", ""),
+        "episodes": selected.get("episodes", ""),
+        "status": selected.get("status", ""),
+        "aired": f"{from_date} → {to_date}",
+        "duration": selected.get("duration", ""),
+        "synopsis": selected.get("synopsis", "")
+    }
 
     return anime_dict

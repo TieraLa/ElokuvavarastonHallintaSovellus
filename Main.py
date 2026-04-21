@@ -10,6 +10,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QListWidgetItem
 from PyQt6.QtWidgets import QDialog
 from Anime_Add import fetch_anime_data
+from Manga_Add import fetch_manga_data
 
 kansio_tie = Path("Listat/")
 
@@ -21,12 +22,42 @@ class AddYourDialog(QDialog):
         self.pushButton_add.clicked.connect(self.accept)
         self.pushButton_cancel.clicked.connect(self.reject)
         self.pushButton_autoAdd.clicked.connect(self.auto_fill_fields)
+        self.pushButton_clear.clicked.connect(self.clear_fields)
+        self.edit_mode = False
+        self.original_title = None
+
+
+    def load_data(self, data):
+        self.lineEdit_title.setText(data.get("title", ""))
+        self.lineEdit_type.setText(data.get("type", ""))
+        self.lineEdit_status.setText(data.get("status", ""))
+        self.lineEdit_episodes.setText(str(data.get("episodes", "")))
+        self.lineEdit_chapters.setText(str(data.get("chapters", "")))
+        self.lineEdit_volumes.setText(str(data.get("volumes", "")))
+        self.lineEdit_aired.setText(data.get("aired", ""))
+        self.lineEdit_duration.setText(data.get("duration", ""))
+        self.lineEdit_synopsis.setText(data.get("synopsis", ""))
+
+    def clear_fields(self):
+        self.lineEdit_title.clear()
+        self.lineEdit_status.clear()
+        self.lineEdit_episodes.clear()
+        self.lineEdit_chapters.clear()
+        self.lineEdit_volumes.clear()
+        self.lineEdit_aired.clear()
+        self.lineEdit_duration.clear()
+        self.lineEdit_synopsis.clear()
+        self.lineEdit_type.clear()
+        
 
     def get_data(self):
         return {
             "title": self.lineEdit_title.text(),
+            "type": self.lineEdit_type.text(),
             "episodes": self.parse_episodes(),
             "status": self.lineEdit_status.text(),
+            "chapters": self.parse_chapters(),
+            "volumes": self.parse_volumes(),
             "aired": self.lineEdit_aired.text(),
             "duration": self.lineEdit_duration.text(),
             "synopsis": self.lineEdit_synopsis.text()
@@ -36,28 +67,57 @@ class AddYourDialog(QDialog):
         text = self.lineEdit_episodes.text()
         return int(text) if text.isdigit() else None
 
+    def parse_chapters(self):
+        text = self.lineEdit_chapters.text()
+        return int(text) if text.isdigit() else None
+
+    def parse_volumes(self):
+        text = self.lineEdit_volumes.text()
+        return int(text) if text.isdigit() else None
+
     def auto_fill_fields(self):
         title_input = self.lineEdit_title.text().strip()
         if not title_input:
             QMessageBox.warning(self, "Error", "Please enter a title first!")
             return
 
+        selected_type = self.comboBox_type.currentText()
+
         try:
-            anime_data = fetch_anime_data(title_input, parent=self)
+            if selected_type == "Anime":
+                data = fetch_anime_data(title_input, parent=self)
+            elif selected_type == "Manga":
+                data = fetch_manga_data(title_input, parent=self)
+            else:
+                QMessageBox.warning(self, "Error", "Unknown type selected!")
+                return
         except Exception as e:
             QMessageBox.warning(self, "API Error", str(e))
             return
 
-        if not anime_data:
+        if not data:
             return
 
         
-        self.lineEdit_title.setText(anime_data.get("title", ""))
-        self.lineEdit_episodes.setText(str(anime_data.get("episodes", "")))
-        self.lineEdit_status.setText(anime_data.get("status", ""))
-        self.lineEdit_aired.setText(anime_data.get("aired", ""))
-        self.lineEdit_duration.setText(anime_data.get("duration", ""))
-        self.lineEdit_synopsis.setText(anime_data.get("synopsis", ""))
+        self.lineEdit_title.setText(data.get("title", ""))
+        self.lineEdit_type.setText(data.get("type", ""))
+        self.lineEdit_status.setText(data.get("status", ""))
+        self.lineEdit_aired.setText(data.get("aired") or data.get("published", ""))
+        self.lineEdit_synopsis.setText(data.get("synopsis", ""))
+
+        if selected_type == "Anime":
+            self.lineEdit_episodes.setText(str(data.get("episodes", "")))
+            self.lineEdit_duration.setText(data.get("duration", ""))
+            self.lineEdit_chapters.clear()
+            self.lineEdit_volumes.clear()
+
+        elif selected_type == "Manga":
+            self.lineEdit_chapters.setText(str(data.get("chapters", "")))
+            self.lineEdit_volumes.setText(str(data.get("volumes", "")))
+            self.lineEdit_episodes.clear()
+            self.lineEdit_duration.clear()
+
+            self.lineEdit_aired.setText(data.get("published", ""))
 
 
 
@@ -70,7 +130,7 @@ class MainUI(QMainWindow):
         loadUi("Gui_Main.ui", self)
 
         self.pushButton_createnewlist.clicked.connect(self.addList)
-        self.lineEdit_NewList.setText("New list name")
+        self.lineEdit_NewList.setPlaceholderText("New list name")
         self.listWidget_files.itemClicked.connect(self.load_json_titles)
         self.listWidget_titles.itemClicked.connect(self.show_anime_details)
         self.pushButton_removeList.clicked.connect(self.remove_list)
@@ -78,6 +138,9 @@ class MainUI(QMainWindow):
         self.pushButton_remove.clicked.connect(self.remove_entry)
         self.pushButton_search.clicked.connect(self.search_all_lists)
         self.populate_file_list()
+        self.pushButton_exit.clicked.connect(self.close)
+        self.lineEdit_NewList.returnPressed.connect(self.addList)
+        self.pushButton_edit.clicked.connect(self.edit_entry)
    
     def populate_file_list(self):
         self.listWidget_files.clear()
@@ -98,6 +161,9 @@ class MainUI(QMainWindow):
         self.textEdit_duration.clear()
         self.textEdit_synopsis.clear()
         self.textEdit_fileLocation.clear()
+        self.textEdit_chapters.clear()
+        self.textEdit_volumes.clear()
+        self.textEdit_type.clear()
 
 
 
@@ -119,7 +185,7 @@ class MainUI(QMainWindow):
     def show_anime_details(self, item):
         data_role = item.data(Qt.ItemDataRole.UserRole)
 
-        # If coming from search (tuple)
+        
         if isinstance(data_role, tuple):
             title, file_name = data_role
             file_path = kansio_tie / file_name
@@ -137,26 +203,33 @@ class MainUI(QMainWindow):
             anime = self.current_data.get(title, {})
 
         self.textEdit_title.setPlainText(f"Title:\n{anime.get('title', '')}")
-        self.textEdit_episodes.setPlainText(f"Episodes:\n{anime.get('episodes', '')}")
+        self.textEdit_type.setPlainText(f"Type:\n{anime.get('type', '')}")
+        self.textEdit_episodes.setPlainText(f"Episodes:\n{anime.get('episodes') or ''}")
         self.textEdit_status.setPlainText(f"Status:\n{anime.get('status', '')}")
         self.textEdit_aired.setPlainText(f"Aired:\n{anime.get('aired', '')}")
         self.textEdit_duration.setPlainText(f"Duration:\n{anime.get('duration', '')}")
         self.textEdit_synopsis.setPlainText(f"Synopsis:\n{anime.get('synopsis', '')}")
         self.textEdit_fileLocation.setPlainText(f"List:\n{self.current_file_path.stem}")
+        self.textEdit_chapters.setPlainText(f"Chapters:\n{anime.get('chapters') or ''}")
+        self.textEdit_volumes.setPlainText(f"Volumes:\n{anime.get('volumes') or ''}")
 
 
     
 
     def addList(self):
-        uusi_lista_nimi = self.lineEdit_NewList.text()
+        uusi_lista_nimi = self.lineEdit_NewList.text().strip()
+
+        if not uusi_lista_nimi:
+            QMessageBox.warning(self, "Error", "List name cannot be empty!")
+            return
+
         uusi_tie = Path(f"{kansio_tie}/{uusi_lista_nimi}.json")
-        
+
         if not uusi_tie.exists():
             with open(uusi_tie, "w", encoding="utf-8") as f:
                 json.dump({}, f, indent=2)
 
             self.populate_file_list()
-
 
     def remove_list(self):
         from PyQt6.QtWidgets import QMessageBox
@@ -287,10 +360,13 @@ class MainUI(QMainWindow):
                 continue
 
             for title, info in data.items():
-                # Combine all searchable fields
+                
                 searchable_text = " ".join([
                     str(info.get("title", "")),
+                    str(info.get("type", "")),
                     str(info.get("episodes", "")),
+                    str(info.get("chapters", "")),
+                    str(info.get("volumes", "")),
                     str(info.get("status", "")),
                     str(info.get("aired", "")),
                     str(info.get("duration", "")),
@@ -308,6 +384,51 @@ class MainUI(QMainWindow):
 
         if not results:
             QMessageBox.information(self, "No Results", "No matches found.")
+
+
+
+    def edit_entry(self):
+        selected_item = self.listWidget_titles.currentItem()
+
+        if not selected_item:
+            QMessageBox.warning(self, "Error", "Select an entry first!")
+            return
+
+        title = selected_item.text()
+
+        with open(self.current_file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        entry_data = data.get(title)
+        if not entry_data:
+            QMessageBox.warning(self, "Error", "Entry not found!")
+            return
+
+        dialog = AddYourDialog()
+
+        # mark edit mode
+        dialog.edit_mode = True
+        dialog.original_title = title
+
+        # fill fields
+        dialog.load_data(entry_data)
+
+        if dialog.exec():
+            updated_data = dialog.get_data()
+
+            with open(self.current_file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            # if title changed → handle rename
+            if dialog.original_title != updated_data["title"]:
+                del data[dialog.original_title]
+
+            data[updated_data["title"]] = updated_data
+
+            with open(self.current_file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+
+            self.load_json_titles(self.listWidget_files.currentItem())
 
 
 
