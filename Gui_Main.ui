@@ -80,7 +80,7 @@
       <rect>
        <x>310</x>
        <y>140</y>
-       <width>171</width>
+       <width>111</width>
        <height>51</height>
       </rect>
      </property>
@@ -91,9 +91,9 @@
     <widget class="QTextEdit" name="textEdit_status">
      <property name="geometry">
       <rect>
-       <x>310</x>
-       <y>200</y>
-       <width>341</width>
+       <x>530</x>
+       <y>140</y>
+       <width>121</width>
        <height>51</height>
       </rect>
      </property>
@@ -119,7 +119,7 @@
       <rect>
        <x>310</x>
        <y>320</y>
-       <width>171</width>
+       <width>111</width>
        <height>51</height>
       </rect>
      </property>
@@ -195,9 +195,9 @@
     <widget class="QTextEdit" name="textEdit_chapters">
      <property name="geometry">
       <rect>
-       <x>480</x>
-       <y>140</y>
-       <width>171</width>
+       <x>420</x>
+       <y>320</y>
+       <width>111</width>
        <height>51</height>
       </rect>
      </property>
@@ -208,9 +208,9 @@
     <widget class="QTextEdit" name="textEdit_volumes">
      <property name="geometry">
       <rect>
-       <x>480</x>
-       <y>320</y>
-       <width>171</width>
+       <x>420</x>
+       <y>140</y>
+       <width>111</width>
        <height>51</height>
       </rect>
      </property>
@@ -229,6 +229,32 @@
      </property>
      <property name="text">
       <string>Edit</string>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_owned">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>200</y>
+       <width>341</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit_pages">
+     <property name="geometry">
+      <rect>
+       <x>530</x>
+       <y>320</y>
+       <width>111</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

@@ -11,15 +11,16 @@ from PyQt6.QtWidgets import QListWidgetItem
 from PyQt6.QtWidgets import QDialog
 from Anime_Add import fetch_anime_data
 from Manga_Add import fetch_manga_data
+from Book_Add import fetch_book_data
 
 kansio_tie = Path("Listat/")
 
 class AddYourDialog(QDialog):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         loadUi("NewListWindow.ui", self)
 
-        self.pushButton_add.clicked.connect(self.accept)
+        self.pushButton_add.clicked.connect(self.try_accept)
         self.pushButton_cancel.clicked.connect(self.reject)
         self.pushButton_autoAdd.clicked.connect(self.auto_fill_fields)
         self.pushButton_clear.clicked.connect(self.clear_fields)
@@ -37,6 +38,8 @@ class AddYourDialog(QDialog):
         self.lineEdit_aired.setText(data.get("aired", ""))
         self.lineEdit_duration.setText(data.get("duration", ""))
         self.lineEdit_synopsis.setText(data.get("synopsis", ""))
+        self.lineEdit_owned.setText(data.get("owned", ""))
+        self.lineEdit_pages.setText(str(data.get("pages", "")))
 
     def clear_fields(self):
         self.lineEdit_title.clear()
@@ -48,6 +51,8 @@ class AddYourDialog(QDialog):
         self.lineEdit_duration.clear()
         self.lineEdit_synopsis.clear()
         self.lineEdit_type.clear()
+        self.lineEdit_owned.clear()
+        self.lineEdit_pages.clear()
         
 
     def get_data(self):
@@ -60,7 +65,9 @@ class AddYourDialog(QDialog):
             "volumes": self.parse_volumes(),
             "aired": self.lineEdit_aired.text(),
             "duration": self.lineEdit_duration.text(),
-            "synopsis": self.lineEdit_synopsis.text()
+            "synopsis": self.lineEdit_synopsis.text(),
+            "owned": self.lineEdit_owned.text(),
+            "pages": self.parse_pages() 
         }
 
     def parse_episodes(self):
@@ -73,6 +80,10 @@ class AddYourDialog(QDialog):
 
     def parse_volumes(self):
         text = self.lineEdit_volumes.text()
+        return int(text) if text.isdigit() else None
+
+    def parse_pages(self):
+        text = self.lineEdit_pages.text()
         return int(text) if text.isdigit() else None
 
     def auto_fill_fields(self):
@@ -88,6 +99,8 @@ class AddYourDialog(QDialog):
                 data = fetch_anime_data(title_input, parent=self)
             elif selected_type == "Manga":
                 data = fetch_manga_data(title_input, parent=self)
+            elif selected_type == "Book":
+                data = fetch_book_data(title_input, parent=self)
             else:
                 QMessageBox.warning(self, "Error", "Unknown type selected!")
                 return
@@ -118,6 +131,60 @@ class AddYourDialog(QDialog):
             self.lineEdit_duration.clear()
 
             self.lineEdit_aired.setText(data.get("published", ""))
+
+        elif selected_type == "Book":
+            self.lineEdit_type.setText("Book")
+
+            
+            self.lineEdit_episodes.clear()
+            self.lineEdit_chapters.clear()
+            self.lineEdit_volumes.clear()
+            self.lineEdit_duration.clear()
+
+            
+            self.lineEdit_aired.setText(data.get("published", ""))
+            self.lineEdit_pages.setText(str(data.get("pages") or ""))
+
+
+
+    def try_accept(self):
+        title = self.lineEdit_title.text().strip()
+
+        if not title:
+            QMessageBox.warning(self, "Error", "Title is required!")
+            return
+
+        
+        parent = self.parent()
+        data = {}
+
+        if parent and hasattr(parent, "current_file_path"):
+            try:
+                with open(parent.current_file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except:
+                data = {}
+
+            
+            if self.edit_mode:
+                if title != self.original_title and title in data:
+                    QMessageBox.warning(
+                        self,
+                        "Duplicate Entry",
+                        f"An entry named '{title}' already exists!"
+                    )
+                    return
+            else:
+                if title in data:
+                    QMessageBox.warning(
+                        self,
+                        "Duplicate Entry",
+                        f"An entry named '{title}' already exists!"
+                    )
+                    return
+
+        
+        self.accept()
 
 
 
@@ -164,6 +231,8 @@ class MainUI(QMainWindow):
         self.textEdit_chapters.clear()
         self.textEdit_volumes.clear()
         self.textEdit_type.clear()
+        self.textEdit_owned.clear()
+        self.textEdit_pages.clear()
 
 
 
@@ -212,6 +281,8 @@ class MainUI(QMainWindow):
         self.textEdit_fileLocation.setPlainText(f"List:\n{self.current_file_path.stem}")
         self.textEdit_chapters.setPlainText(f"Chapters:\n{anime.get('chapters') or ''}")
         self.textEdit_volumes.setPlainText(f"Volumes:\n{anime.get('volumes') or ''}")
+        self.textEdit_owned.setPlainText(f"Owned:\n{anime.get('owned', '')}")
+        self.textEdit_pages.setPlainText(f"Pages:\n{anime.get('pages') or ''}")
 
 
     
@@ -270,18 +341,17 @@ class MainUI(QMainWindow):
             QMessageBox.warning(self, "Error", "Select a list first!")
             return
 
-        dialog = AddYourDialog()
+        dialog = AddYourDialog(self)
 
 
         if dialog.exec(): 
             new_entry = dialog.get_data()
-            title_key = new_entry["title"]
+            title_key = new_entry["title"].strip()
 
             if not title_key:
-                print("Title is required")
+                QMessageBox.warning(self, "Error", "Title is required!")
                 return
 
-            
             with open(self.current_file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
@@ -404,7 +474,7 @@ class MainUI(QMainWindow):
             QMessageBox.warning(self, "Error", "Entry not found!")
             return
 
-        dialog = AddYourDialog()
+        dialog = AddYourDialog(self)
 
         # mark edit mode
         dialog.edit_mode = True
@@ -419,11 +489,23 @@ class MainUI(QMainWindow):
             with open(self.current_file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            # if title changed → handle rename
-            if dialog.original_title != updated_data["title"]:
+            
+            new_title = updated_data["title"].strip()
+
+            
+            if new_title != dialog.original_title and new_title in data:
+                QMessageBox.warning(
+                    self,
+                    "Duplicate Entry",
+                    f"An entry named '{new_title}' already exists!"
+                )
+                return
+
+            
+            if dialog.original_title != new_title:
                 del data[dialog.original_title]
 
-            data[updated_data["title"]] = updated_data
+            data[new_title] = updated_data
 
             with open(self.current_file_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)

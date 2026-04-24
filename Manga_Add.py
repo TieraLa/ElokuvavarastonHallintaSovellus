@@ -49,7 +49,7 @@ def fetch_manga_data(mangatitle, parent=None):
         to_date = "Ongoing"
 
     manga_dict = {
-        "title": selected.get("title", ""),
+        "title": f"{selected.get('title', '')} ({year}, {selected.get('type', '')})",
         "type": selected.get("type", ""),
         "chapters": selected.get("chapters", ""),
         "status": selected.get("status", ""),

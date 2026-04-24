@@ -41,7 +41,7 @@ def fetch_anime_data(animetitle, parent=None):
         to_date = "Ongoing"
 
     anime_dict = {
-        "title": selected.get("title", ""),
+        "title": f"{selected.get('title', '')} ({selected.get('year', '')}, {selected.get('type', '')})",
         "type": selected.get("type", ""),
         "episodes": selected.get("episodes", ""),
         "status": selected.get("status", ""),
