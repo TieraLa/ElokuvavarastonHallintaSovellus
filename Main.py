@@ -15,6 +15,8 @@ from Book_Add import fetch_book_data
 
 kansio_tie = Path("Listat/")
 
+
+#----- CODE FOR THE ADD MENU WINDOW ------
 class AddYourDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -27,7 +29,7 @@ class AddYourDialog(QDialog):
         self.edit_mode = False
         self.original_title = None
 
-
+    #---WHEN EDITING WHAT IS LOADED FROM THE JSON---
     def load_data(self, data):
         self.lineEdit_title.setText(data.get("title", ""))
         self.lineEdit_type.setText(data.get("type", ""))
@@ -86,6 +88,7 @@ class AddYourDialog(QDialog):
         text = self.lineEdit_pages.text()
         return int(text) if text.isdigit() else None
 
+    #---MAIN CODE FOR USING THE DIFFERENT APIS TO AUTOMATICALLY FILL THE FIELDS, ACTUAL API CODE IN DIFFERENT PYTHON FILES---
     def auto_fill_fields(self):
         title_input = self.lineEdit_title.text().strip()
         if not title_input:
@@ -111,19 +114,21 @@ class AddYourDialog(QDialog):
         if not data:
             return
 
-        
+        #---WHAT ALL THE APIS MAINLY RETURN FROM THE AUTO ADD FUNCTION 
         self.lineEdit_title.setText(data.get("title", ""))
         self.lineEdit_type.setText(data.get("type", ""))
         self.lineEdit_status.setText(data.get("status", ""))
         self.lineEdit_aired.setText(data.get("aired") or data.get("published", ""))
         self.lineEdit_synopsis.setText(data.get("synopsis", ""))
 
+        #--WHAT THE ANIME_ADD CODE RETURNS SPECIFICALLY
         if selected_type == "Anime":
             self.lineEdit_episodes.setText(str(data.get("episodes", "")))
             self.lineEdit_duration.setText(data.get("duration", ""))
             self.lineEdit_chapters.clear()
             self.lineEdit_volumes.clear()
 
+        #--WHAT THE MANGA_ADD CODE RETURNS SPECIFICALLY
         elif selected_type == "Manga":
             self.lineEdit_chapters.setText(str(data.get("chapters", "")))
             self.lineEdit_volumes.setText(str(data.get("volumes", "")))
@@ -132,6 +137,7 @@ class AddYourDialog(QDialog):
 
             self.lineEdit_aired.setText(data.get("published", ""))
 
+        #--WHAT THE BOOK_ADD CODE RETURNS SPECIFICALLY
         elif selected_type == "Book":
             self.lineEdit_type.setText("Book")
 
@@ -189,7 +195,7 @@ class AddYourDialog(QDialog):
 
 
 
-
+#----- CODE FOR THE MAIN WINDOW -----
 class MainUI(QMainWindow):
     def __init__(self):
         super(MainUI, self).__init__()
@@ -213,13 +219,14 @@ class MainUI(QMainWindow):
         self.listWidget_files.clear()
 
         for file in kansio_tie.glob("*.json"):
-            display_name = file.stem  # 🔥 no .json
+            display_name = file.stem  
 
             item = QListWidgetItem(display_name)
             item.setData(Qt.ItemDataRole.UserRole, file.name)  
 
             self.listWidget_files.addItem(item)
-
+    
+    #--CLEARS THE INPUT FIELDS WHEN ADDING NEW ENTRY--- 
     def clear_details(self):
         self.textEdit_title.clear()
         self.textEdit_episodes.clear()
@@ -235,7 +242,7 @@ class MainUI(QMainWindow):
         self.textEdit_pages.clear()
 
 
-
+    #--LOADS SELECTED JSON
     def load_json_titles(self, item):
         file_name = item.data(Qt.ItemDataRole.UserRole)
         self.current_file_path = kansio_tie / file_name
@@ -250,7 +257,7 @@ class MainUI(QMainWindow):
 
         self.clear_details()
     
-
+    #--SHOWS CONTENT OF JSON
     def show_anime_details(self, item):
         data_role = item.data(Qt.ItemDataRole.UserRole)
 
@@ -286,7 +293,7 @@ class MainUI(QMainWindow):
 
 
     
-
+    #--CODE FOR ADDING A NEW JSON FILE, CHECKS IF LIST NAME IS EMPTY AND GIVES ERROR--
     def addList(self):
         uusi_lista_nimi = self.lineEdit_NewList.text().strip()
 
@@ -301,7 +308,8 @@ class MainUI(QMainWindow):
                 json.dump({}, f, indent=2)
 
             self.populate_file_list()
-
+    
+    #--CODE FOR REMOVING A JSON FILE--
     def remove_list(self):
         from PyQt6.QtWidgets import QMessageBox
 
@@ -335,7 +343,7 @@ class MainUI(QMainWindow):
             self.listWidget_titles.clear()
             self.clear_details()
 
-
+    #-- CODE FOR ADDING NEW ENTRY TO A LIST, CHECKS IF LIST IS SELECTED FIRST--
     def open_add_dialog(self):
         if not hasattr(self, "current_file_path"):
             QMessageBox.warning(self, "Error", "Select a list first!")
@@ -365,7 +373,7 @@ class MainUI(QMainWindow):
             
             self.load_json_titles(self.listWidget_files.currentItem())
 
-
+    #-- CODE FOR REMOVING  ENTRY TO A LIST, CHECKS IF ENTRY IS SELECTED FIRST--
     def remove_entry(self):
         if not hasattr(self, "current_file_path"):
             QMessageBox.warning(self, "Error", "Select a list first!")
@@ -408,7 +416,7 @@ class MainUI(QMainWindow):
 
         self.clear_details()
 
-
+    #-- SEARCH FUNCTION FOR SEARCHIN ALL THE JSON FILES FOR THE GIVEN KEYWORD--
     def search_all_lists(self):
         search_text = self.lineEdit_searchBar.text().strip().lower()
 
@@ -456,7 +464,7 @@ class MainUI(QMainWindow):
             QMessageBox.information(self, "No Results", "No matches found.")
 
 
-
+    #--CODE FOR EDITIGN AN EXISTING ENTRY--
     def edit_entry(self):
         selected_item = self.listWidget_titles.currentItem()
 
@@ -476,11 +484,11 @@ class MainUI(QMainWindow):
 
         dialog = AddYourDialog(self)
 
-        # mark edit mode
+        
         dialog.edit_mode = True
         dialog.original_title = title
 
-        # fill fields
+        
         dialog.load_data(entry_data)
 
         if dialog.exec():
@@ -514,7 +522,7 @@ class MainUI(QMainWindow):
 
 
 
-
+#--THIS IS NEEDED TO RUN THE GUI--
 
 if __name__=="__main__":
     app = QApplication(sys.argv)

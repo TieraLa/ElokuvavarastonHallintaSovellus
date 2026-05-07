@@ -1,12 +1,16 @@
 import requests
 import time
 
+
+#-- WHAT API IS UDES TO GET THE DATA---
+#-- SEARCH FUNCTION THAT RETURNS LIST OF 10 ENTRIES BASED ON THE TITLE WORD
 def fetch_anime_data(animetitle, parent=None):
     
-    base_url = "https://api.jikan.moe"
+    base_url = "https://api.jikan.moe"      #--WHAT API SITE IS USED
+
     try:
         response = requests.get(base_url + "/v4/anime", params={"q": animetitle, "limit": 10})
-        time.sleep(1)  
+        time.sleep(1)  #-- MAKES SURE THE API SERVER IS NOT FLOODED WITH REQUESTS TOO MUCH
         response.raise_for_status()
     except requests.RequestException as e:
         raise Exception(f"API request failed: {e}")
@@ -21,7 +25,7 @@ def fetch_anime_data(animetitle, parent=None):
         year = anime.get("year", "?")
         items.append(f"{anime['title']} ({year})")
 
-    
+    #--SELECT CORRECT ANIME
     from PyQt6.QtWidgets import QInputDialog
     choice, ok = QInputDialog.getItem(parent, "Select Anime", "Choose the correct anime:", items, 0, False)
     if not ok:
@@ -39,7 +43,8 @@ def fetch_anime_data(animetitle, parent=None):
         to_date = to_date[:10]
     else:
         to_date = "Ongoing"
-
+    
+    #-- WHAT IS RETURNED TO THE MAIN CODE --
     anime_dict = {
         "title": f"{selected.get('title', '')} ({selected.get('year', '')}, {selected.get('type', '')})",
         "type": selected.get("type", ""),

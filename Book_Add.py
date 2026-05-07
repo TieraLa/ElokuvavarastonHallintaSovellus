@@ -9,7 +9,7 @@ session = requests.Session()
 _last_request_time = 0
 
 
-
+#-- MAKES SURE THE API SERVER IS NOT FLOODED WITH REQUESTS TOO MUCH
 def rate_limit():
     global _last_request_time
     now = time.time()
@@ -20,9 +20,10 @@ def rate_limit():
 
     _last_request_time = time.time()
 
-
+#-- WHAT API IS USED TO GET THE DATA---
+#-- SEARCH FUNCTION THAT RETURNS LIST OF 10 ENTRIES BASED ON THE TITLE WORD
 def fetch_book_data(booktitle, parent=None):
-    search_url = "https://openlibrary.org/search.json"
+    search_url = "https://openlibrary.org/search.json"      #--WHAT API SITE IS USED
 
     
     try:
@@ -72,12 +73,12 @@ def fetch_book_data(booktitle, parent=None):
 
     edition_keys = selected.get("edition_key", [])
 
-    
+    #--GETS THE PAGE NUMBER FROM AN EDITION TOP FROM THE SEARCH LIST--
     if edition_keys:
         try:
             rate_limit()
             edition_id = edition_keys[0]
-            edition_url = f"https://openlibrary.org/books/{edition_id}.json"
+            edition_url = f"https://openlibrary.org/books/{edition_id}.json"        #--WHAT API SITE IS USED
             edition_resp = session.get(edition_url)
             edition_data = edition_resp.json()
 
@@ -94,11 +95,11 @@ def fetch_book_data(booktitle, parent=None):
         except Exception as e:
             print("Edition fetch failed:", e)
 
-    
+    #ALTERNATIVE TO GET PAGES
     if not pages and work_key:
         try:
             rate_limit()
-            editions_url = f"https://openlibrary.org{work_key}/editions.json"
+            editions_url = f"https://openlibrary.org{work_key}/editions.json"       #--WHAT API SITE IS USED
             editions_resp = session.get(editions_url)
             editions_data = editions_resp.json()
 
@@ -125,7 +126,7 @@ def fetch_book_data(booktitle, parent=None):
     if work_key:
         try:
             rate_limit()
-            work_url = f"https://openlibrary.org{work_key}.json"
+            work_url = f"https://openlibrary.org{work_key}.json"        #--WHAT API SITE IS USED
             work_resp = session.get(work_url)
             work_data = work_resp.json()
 
@@ -139,7 +140,7 @@ def fetch_book_data(booktitle, parent=None):
         except Exception as e:
             print("Synopsis fetch failed:", e)
 
-    
+    #--WHAT IS RETURNED TO THE MAIN CODE
     return {
         "title": display_title,
         "type": "Book",

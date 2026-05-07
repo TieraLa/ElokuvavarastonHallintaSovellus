@@ -2,12 +2,15 @@ import requests
 import time
 from PyQt6.QtWidgets import QInputDialog
 
+
+#-- WHAT API IS UDES TO GET THE DATA---
+#-- SEARCH FUNCTION THAT RETURNS LIST OF 10 ENTRIES BASED ON THE TITLE WORD
 def fetch_manga_data(mangatitle, parent=None):
     
-    base_url = "https://api.jikan.moe"
+    base_url = "https://api.jikan.moe"  #--WHAT API SITE IS USED
     try:
         response = requests.get(base_url + "/v4/manga", params={"q": mangatitle, "limit": 10})
-        time.sleep(1)  
+        time.sleep(1)  #-- MAKES SURE THE API SERVER IS NOT FLOODED WITH REQUESTS TOO MUCH
         response.raise_for_status()
     except requests.RequestException as e:
         raise Exception(f"API request failed: {e}")
@@ -30,7 +33,7 @@ def fetch_manga_data(mangatitle, parent=None):
         items.append(f"{manga['title']} ({year})")
 
     
-    
+    #--SELECT CORRECT MANGA
     choice, ok = QInputDialog.getItem(parent, "Select Manga", "Choose the correct manga:", items, 0, False)
     if not ok:
         return None  
@@ -47,7 +50,7 @@ def fetch_manga_data(mangatitle, parent=None):
         to_date = to_date[:10]
     else:
         to_date = "Ongoing"
-
+    #-- WHAT IS RETURNED TO THE MAIN CODE --
     manga_dict = {
         "title": f"{selected.get('title', '')} ({year}, {selected.get('type', '')})",
         "type": selected.get("type", ""),
